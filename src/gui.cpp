@@ -1,6 +1,6 @@
 
 #include "imgui.h"
-#include "examples/imgui_impl_sdl.h"
+//#include "examples/imgui_impl_sdl.h"
 #include "examples/imgui_impl_opengl3.h"
 #include <SDL2/SDL.h>
 
@@ -32,7 +32,7 @@ using namespace gl;
 
 #include "gui.h"
 
-int Gui::imgui_example()
+int Gui::setup(SDL_Window*& window)
 {
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
@@ -43,29 +43,19 @@ int Gui::imgui_example()
         return -1;
     }
 
-    // Decide GL+GLSL versions
-#if __APPLE__
-    // GL 3.2 Core + GLSL 150
-    const char* glsl_version = "#version 150";
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG); // Always required on Mac
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-#else
     // GL 3.0 + GLSL 130
     const char* glsl_version = "#version 130";
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#endif
 
     // Create window with graphics context
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    /*SDL_Window* */ window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
@@ -124,9 +114,21 @@ int Gui::imgui_example()
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
 
-    // Our state
-    bool show_demo_window = true;
-    bool show_another_window = false;
+    return 0;
+}
+
+ImguiState Gui::draw(SDL_Window* window)
+{
+    ImguiState imguiState;
+
+    if (!window)
+    {
+        printf("ERROR DRAW() - window is null\n");
+        imguiState.status = -1;
+        return imguiState;
+    }
+
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
@@ -153,41 +155,48 @@ int Gui::imgui_example()
         ImGui_ImplSDL2_NewFrame(window);
         ImGui::NewFrame();
 
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
-
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
             static float f = 0.0f;
             static int counter = 0;
 
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+            // Start of keypad window
+            ImGuiWindowFlags window_flags = 0;
+            window_flags |= ImGuiWindowFlags_NoResize;
 
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
-
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
+            ImGui::Begin("Keypad", NULL, window_flags);
+            imguiState.key_1 = key("1", true);
+            imguiState.key_2 = key("2", true);
+            imguiState.key_3 = key("3", true);
+            imguiState.key_c = key("C", false);
+            imguiState.key_4 = key("4", true);
+            imguiState.key_5 = key("5", true);
+            imguiState.key_6 = key("6", true);
+            imguiState.key_d = key("D", false);
+            imguiState.key_7 = key("7", true);
+            imguiState.key_8 = key("8", true);
+            imguiState.key_9 = key("9", true);
+            imguiState.key_e = key("E", false);
+            imguiState.key_a = key("A", true);
+            imguiState.key_0 = key("0", true);
+            imguiState.key_b = key("B", true);
+            imguiState.key_f = key("F", false);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
+            // End of keypad window
         }
 
-        // 3. Show another simple window.
-        if (show_another_window)
         {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
-            ImGui::End();
+            // Using InvisibleButton() as a convenience 1) it will advance the layout cursor and 2) allows us to use IsItemHovered()/IsItemActive()
+            ImVec2 canvas_p0 = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
+            ImVec2 canvas_sz = ImGui::GetContentRegionAvail();   // Resize canvas to what's available
+            if (canvas_sz.x < 50.0f) canvas_sz.x = 50.0f;
+            if (canvas_sz.y < 50.0f) canvas_sz.y = 50.0f;
+            ImVec2 canvas_p1 = ImVec2(canvas_p0.x + canvas_sz.x, canvas_p0.y + canvas_sz.y);
+
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+            draw_list->AddRectFilled(canvas_p0, canvas_p1, IM_COL32(50, 50, 50, 255));
+            draw_list->AddRect(canvas_p0, canvas_p1, IM_COL32(255, 255, 255, 255));
         }
 
         // Rendering
@@ -199,14 +208,28 @@ int Gui::imgui_example()
         SDL_GL_SwapWindow(window);
     }
 
+    return imguiState;
+}
+
+inline bool Gui::key(const std::string text, bool sameLine)
+{
+    bool pressed = false;
+    ImVec2 button_sz(40, 40);
+    pressed = ImGui::Button(text.c_str(), button_sz); 
+    if (sameLine)
+        ImGui::SameLine();
+    return pressed;
+}
+
+int Gui::shutdown()
+{
     // Cleanup
-    ImGui_ImplOpenGL3_Shutdown();
+    /*ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 
     SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(window);
-    SDL_Quit();
-
+    SDL_Quit();*/
     return 0;
 }
