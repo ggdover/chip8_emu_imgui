@@ -164,16 +164,37 @@ void Gui::draw(SDL_Window* window, ImguiState& state)
 
     // Chip8 64x32-pixel monochromatic display
     {
-        // Using InvisibleButton() as a convenience 1) it will advance the layout cursor and 2) allows us to use IsItemHovered()/IsItemActive()
-        ImVec2 canvas_p0 = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
-        ImVec2 canvas_sz = ImGui::GetContentRegionAvail();   // Resize canvas to what's available
-        if (canvas_sz.x < 50.0f) canvas_sz.x = 50.0f;
-        if (canvas_sz.y < 50.0f) canvas_sz.y = 50.0f;
-        ImVec2 canvas_p1 = ImVec2(canvas_p0.x + canvas_sz.x, canvas_p0.y + canvas_sz.y);
-
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        draw_list->AddRectFilled(canvas_p0, canvas_p1, IM_COL32(50, 50, 50, 255));
-        draw_list->AddRect(canvas_p0, canvas_p1, IM_COL32(255, 255, 255, 255));
+
+        // Points to the upper left corner of the window we are currently building
+        ImVec2 cursor_p = ImGui::GetCursorScreenPos();
+
+        // Coordinates of current pixel being layed out
+        int x;
+        int y;
+        for (x = 0; x < DISPLAY_W; ++x)
+        {
+            for (y = 0; y < DISPLAY_H; ++y)
+            {
+                // Determine if pixel should be filled or not
+                ImU32 col;
+                bool fillPixel = (bool)(rand() % 2);
+                if (fillPixel)
+                {
+                    col = ImColor(255, 255, 255, 255);
+                }
+                else
+                {
+                    col = ImColor(0, 0, 0, 255);
+                }
+
+                // Pixel position (upper-left corner of pixel)
+                ImVec2 pixel_p(cursor_p.x + (x*PIXEL_W), cursor_p.y + (y*PIXEL_H));
+
+                // Draw a rect that represent the pixel
+                draw_list->AddRectFilled(pixel_p, ImVec2(pixel_p.x + PIXEL_W, pixel_p.y + PIXEL_H), col);
+            }
+        }
     }
 
     // Rendering

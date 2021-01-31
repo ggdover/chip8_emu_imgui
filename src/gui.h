@@ -1,7 +1,12 @@
 #include "examples/imgui_impl_sdl.h"
 #include "types.h"
-
 #include <string>
+
+#define PIXEL_W 10
+#define PIXEL_H 10
+
+#define DISPLAY_W 64
+#define DISPLAY_H 32
 
 class Gui
 {
