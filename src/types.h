@@ -1,5 +1,7 @@
 
-// Filled with all imformation returned back by the imgui-loop
+// Holds information coming from imgui.
+// - Status to indicate if we have run into an error
+// - State of keypresses and other interaction from gui
 typedef struct _imgui_state
 {
 	// Return status. 0 means OK, anything else means an error occured

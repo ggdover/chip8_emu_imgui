@@ -3,21 +3,21 @@
 
 int main(int argc, char* argv[])
 {
-    printf("Hello world");
-
-    //(void)Gui::imgui_example();
-
     SDL_Window* window;
 
-    (void)Gui::setup(window);
+    Gui::setup(window);
     
-    //while (1)
-    //{
-    	(void)Gui::draw(window);
-    //}
+    ImguiState state;
+    while (state.status == 0)
+    {
+        // Render GUI and capture keypresses and other interactions from GUI
+        Gui::draw(window, state);
 
-    (void)Gui::shutdown();
+        // Poll imgui events (If gui is closed/exited etc.)
+        Gui::pollEvents(window, state);
+    }
 
+    Gui::shutdown();
 
     return 0;
 }

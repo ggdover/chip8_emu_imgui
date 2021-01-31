@@ -117,98 +117,104 @@ int Gui::setup(SDL_Window*& window)
     return 0;
 }
 
-ImguiState Gui::draw(SDL_Window* window)
+void Gui::draw(SDL_Window* window, ImguiState& state)
 {
-    ImguiState imguiState;
-
     if (!window)
     {
-        printf("ERROR DRAW() - window is null\n");
-        imguiState.status = -1;
-        return imguiState;
+        printf("ERROR Gui::draw() - window is null\n");
+        state.status = -1;
+        return;
     }
 
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    // Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame(window);
+    ImGui::NewFrame();
 
-    // Main loop
-    bool done = false;
-    while (!done)
+    // Chip8 Keyboard layout
     {
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
-            ImGui_ImplSDL2_ProcessEvent(&event);
-            if (event.type == SDL_QUIT)
-                done = true;
-            if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
-                done = true;
-        }
+        static float f = 0.0f;
+        static int counter = 0;
 
-        // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL2_NewFrame(window);
-        ImGui::NewFrame();
+        // Start of keypad window
+        ImGuiWindowFlags window_flags = 0;
+        window_flags |= ImGuiWindowFlags_NoResize;
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-        {
-            static float f = 0.0f;
-            static int counter = 0;
-
-            // Start of keypad window
-            ImGuiWindowFlags window_flags = 0;
-            window_flags |= ImGuiWindowFlags_NoResize;
-
-            ImGui::Begin("Keypad", NULL, window_flags);
-            imguiState.key_1 = key("1", true);
-            imguiState.key_2 = key("2", true);
-            imguiState.key_3 = key("3", true);
-            imguiState.key_c = key("C", false);
-            imguiState.key_4 = key("4", true);
-            imguiState.key_5 = key("5", true);
-            imguiState.key_6 = key("6", true);
-            imguiState.key_d = key("D", false);
-            imguiState.key_7 = key("7", true);
-            imguiState.key_8 = key("8", true);
-            imguiState.key_9 = key("9", true);
-            imguiState.key_e = key("E", false);
-            imguiState.key_a = key("A", true);
-            imguiState.key_0 = key("0", true);
-            imguiState.key_b = key("B", true);
-            imguiState.key_f = key("F", false);
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-            // End of keypad window
-        }
-
-        {
-            // Using InvisibleButton() as a convenience 1) it will advance the layout cursor and 2) allows us to use IsItemHovered()/IsItemActive()
-            ImVec2 canvas_p0 = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
-            ImVec2 canvas_sz = ImGui::GetContentRegionAvail();   // Resize canvas to what's available
-            if (canvas_sz.x < 50.0f) canvas_sz.x = 50.0f;
-            if (canvas_sz.y < 50.0f) canvas_sz.y = 50.0f;
-            ImVec2 canvas_p1 = ImVec2(canvas_p0.x + canvas_sz.x, canvas_p0.y + canvas_sz.y);
-
-            ImDrawList* draw_list = ImGui::GetWindowDrawList();
-            draw_list->AddRectFilled(canvas_p0, canvas_p1, IM_COL32(50, 50, 50, 255));
-            draw_list->AddRect(canvas_p0, canvas_p1, IM_COL32(255, 255, 255, 255));
-        }
-
-        // Rendering
-        ImGui::Render();
-        glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-        glClear(GL_COLOR_BUFFER_BIT);
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        SDL_GL_SwapWindow(window);
+        ImGui::Begin("Keypad", NULL, window_flags);
+        state.key_1 = key("1", true);
+        state.key_2 = key("2", true);
+        state.key_3 = key("3", true);
+        state.key_c = key("C", false);
+        state.key_4 = key("4", true);
+        state.key_5 = key("5", true);
+        state.key_6 = key("6", true);
+        state.key_d = key("D", false);
+        state.key_7 = key("7", true);
+        state.key_8 = key("8", true);
+        state.key_9 = key("9", true);
+        state.key_e = key("E", false);
+        state.key_a = key("A", true);
+        state.key_0 = key("0", true);
+        state.key_b = key("B", true);
+        state.key_f = key("F", false);
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::End();
+        // End of keypad window
     }
 
-    return imguiState;
+    // Chip8 64x32-pixel monochromatic display
+    {
+        // Using InvisibleButton() as a convenience 1) it will advance the layout cursor and 2) allows us to use IsItemHovered()/IsItemActive()
+        ImVec2 canvas_p0 = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
+        ImVec2 canvas_sz = ImGui::GetContentRegionAvail();   // Resize canvas to what's available
+        if (canvas_sz.x < 50.0f) canvas_sz.x = 50.0f;
+        if (canvas_sz.y < 50.0f) canvas_sz.y = 50.0f;
+        ImVec2 canvas_p1 = ImVec2(canvas_p0.x + canvas_sz.x, canvas_p0.y + canvas_sz.y);
+
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+        draw_list->AddRectFilled(canvas_p0, canvas_p1, IM_COL32(50, 50, 50, 255));
+        draw_list->AddRect(canvas_p0, canvas_p1, IM_COL32(255, 255, 255, 255));
+    }
+
+    // Rendering
+    ImGui::Render();
+    glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+    glClear(GL_COLOR_BUFFER_BIT);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    SDL_GL_SwapWindow(window);
+}
+
+void Gui::pollEvents(SDL_Window* window, ImguiState &state)
+{
+    if (!window)
+    {
+        printf("ERROR Gui::pollEvents() - window is null\n");
+        state.status = -1;
+        return;
+    }
+
+    // Poll and handle events (inputs, window resize, etc.)
+    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
+    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
+    // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+    SDL_Event event;
+    while (SDL_PollEvent(&event))
+    {
+        ImGui_ImplSDL2_ProcessEvent(&event);
+        if (event.type == SDL_QUIT)
+        {
+            printf("ERR, got event SDL_QUIT\n");
+            state.status = -1;
+        }
+        if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
+        {
+            printf("ERR, got event SDL_WINDOWEVENT_CLOSE\n");
+            state.status = -1;
+        }
+    }
 }
 
 inline bool Gui::key(const std::string text, bool sameLine)
