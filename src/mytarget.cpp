@@ -1,8 +1,17 @@
 #include <stdio.h>
 #include "gui.h"
+#include "parser.h"
 
 int main(int argc, char* argv[])
 {
+    //----------------------------------------------------------
+    // Read and Parse Chip8 rom file
+    std::vector<int> op_codes;
+    Parser::read_rom("../../roms/Maze [David Winter, 199x].ch8", op_codes);
+
+    //----------------------------------------------------------
+    // Setup and run main GUI (rendering + events handling) thread
+
     SDL_Window* window;
 
     Gui::setup(window);

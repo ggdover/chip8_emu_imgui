@@ -10,6 +10,8 @@ target_sources(mytarget
 		gui.h
 		gui.cpp
 		types.h
+		parser.h
+		parser.cpp
 )
 
 # Incase there are any shared or static libraries that we are linking to

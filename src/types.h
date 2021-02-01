@@ -5,22 +5,22 @@
 typedef struct _imgui_state
 {
 	// Return status. 0 means OK, anything else means an error occured
-	int status;
+	int status = 0;
 	// State of keys, whether pressed or not
-	bool key_1;
-	bool key_2;
-	bool key_3;
-	bool key_c;
-	bool key_4;
-	bool key_5;
-	bool key_6;
-	bool key_d;
-	bool key_7;
-	bool key_8;
-	bool key_9;
-	bool key_e;
-	bool key_a;
-	bool key_0;
-	bool key_b;
-	bool key_f;
+	bool key_1 = false;
+	bool key_2 = false;
+	bool key_3 = false;
+	bool key_c = false;
+	bool key_4 = false;
+	bool key_5 = false;
+	bool key_6 = false;
+	bool key_d = false;
+	bool key_7 = false;
+	bool key_8 = false;
+	bool key_9 = false;
+	bool key_e = false;
+	bool key_a = false;
+	bool key_0 = false;
+	bool key_b = false;
+	bool key_f = false;
 } ImguiState;
