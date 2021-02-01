@@ -8,6 +8,12 @@
 #define DISPLAY_W 64
 #define DISPLAY_H 32
 
+// These represent window padding which I have eye-balled
+// because I haven't found any proper way to get the actual
+// values of these from imgui api.
+#define WIN_PADDING_RIGHT 8
+#define WIN_PADDING_BOTTOM 8
+
 class Gui
 {
     public:

@@ -164,6 +164,24 @@ void Gui::draw(SDL_Window* window, ImguiState& state)
 
     // Chip8 64x32-pixel monochromatic display
     {
+        // Start of pixel-display window
+        ImGuiWindowFlags window_flags = 0;
+        window_flags |= ImGuiWindowFlags_NoResize;
+
+        ImGui::Begin("Monochromatic display", NULL, window_flags);
+
+        // Setting window size
+        float window_w =
+            DISPLAY_W * PIXEL_W +    // Size of contents
+            ImGui::GetCursorPosX() + // Left padding (distance between left edge of window and left edge of content)
+            WIN_PADDING_RIGHT;       // Right padding (distance between right edge of content and right edge of window)
+        float window_h =
+            DISPLAY_H * PIXEL_H +    // Size of contents
+            ImGui::GetCursorPosY() + // Top padding (distance between top edge of window and top edge of content)
+            WIN_PADDING_BOTTOM;      // Bottom padding (distance between bottom edge of content and bottom edge of window)
+        ImVec2 window_size(window_w, window_h);
+        ImGui::SetWindowSize(window_size);
+
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
         // Points to the upper left corner of the window we are currently building
@@ -195,6 +213,8 @@ void Gui::draw(SDL_Window* window, ImguiState& state)
                 draw_list->AddRectFilled(pixel_p, ImVec2(pixel_p.x + PIXEL_W, pixel_p.y + PIXEL_H), col);
             }
         }
+
+        ImGui::End();
     }
 
     // Rendering
