@@ -1,12 +1,9 @@
 #include "examples/imgui_impl_sdl.h"
-#include "types.h"
 #include <string>
+#include "globals.h"
 
 #define PIXEL_W 10
 #define PIXEL_H 10
-
-#define DISPLAY_W 64
-#define DISPLAY_H 32
 
 // These represent window padding which I have eye-balled
 // because I haven't found any proper way to get the actual
@@ -22,7 +19,8 @@ class Gui
          * Steps to setup imgui before 'Gui::draw()' can be called
          *
          * PARAMETERS
-         * - window [out] = Instance is instantiated inside this function and needs to be passed when calling 'Gui::draw()' later
+         * - window [out] = Instance is instantiated inside this function and
+         *                  needs to be passed when calling 'Gui::draw()' later
          */
         static int setup(SDL_Window*& window);
 

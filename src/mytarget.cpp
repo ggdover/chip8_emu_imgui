@@ -2,6 +2,16 @@
 #include "gui.h"
 #include "parser.h"
 
+/*
+ * Initialize global variables (from globals.h)
+ */
+
+char V[16];
+int I;
+int PC;
+char SP;
+char DISPLAY_MATRIX[DISPLAY_W * DISPLAY_H];
+
 int main(int argc, char* argv[])
 {
     //----------------------------------------------------------

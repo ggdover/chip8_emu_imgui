@@ -1,6 +1,7 @@
 #include "parser.h"
 #include <stdio.h>
 #include <assert.h>
+#include "op.h"
 
 void Parser::read_rom(std::string filepath, std::vector<int>& op_codes)
 {
@@ -52,66 +53,40 @@ void Parser::parse_op_codes(std::vector<int> op_codes)
 
 void Parser::parse_op_code(int op_code)
 {
-    if ( !(0xF000 & op_code) ) // 0nnn, SYS addr, Jump to a machine code routine at nnn
+    if (0x00E0 == op_code)
     {
-
+        Op::clear();
     }
-    else if (0x00E0 == op_code) // CLS. Clear the display
+    else if (0x00EE == op_code)
     {
-
+        Op::ret();
     }
-    else if (0x00EE == op_code) // RET. return from subroutine
+    else if (0x1000 & op_code == 0x1000)
     {
-
+        Op::jp_addr(op_code);
     }
-    else if (0x1000 & op_code) // 1nnn - JP addr. Jump to location nnnn
+    else if (0x2000 & op_code == 0x2000)
     {
-
+        Op::call_addr(op_code);
     }
-    else if (0x2000 & op_code) // 2nnn - CALL addr. Call subroutine at nnn
+    else if (0x3000 & op_code == 0x3000)
     {
-
+        Op::se_vx_byte(op_code);
     }
-    else if (0x3000 & op_code) // 3xkk - SE Vx, byte. Skip next instruction if Vx == kk
+    else if (0x4000 & op_code == 0x4000)
     {
-
+        Op::sne_vx_byte(op_code);
     }
-    else if (0x4000 & op_code) // 4xkk - SNE Vx, byte. Skip next instruction if Vx != kk
+    else if (0x5000 & op_code == 0x5000)
     {
-
+        Op::se_vx_vy(op_code);
     }
-    else if (0x5000 & op_code) // 5xy0 - SE Vx, Vy. Skip next instruction if Vx == Vy
+    else if (0x6000 & op_code == 0x6000)
     {
-
+        Op::load_vx_byte(op_code);
     }
-    else if (0x6000 & op_code) // 6xkk - LD Vx, byte. Set Vx == kk
+    else
     {
-
+        printf("Unknown Op_code = %x\n", op_code);
     }
-
-
-
-
-    /*switch (op_code)
-    {
-
-
-        case 0x00E0: // CLS, clear screen
-        {
-            
-
-            break;
-        }
-        case 0x00EE: // RET, return from subroutine
-        {
-
-
-            break;
-        }
-
-        
-        default:
-            printf("UNKNOWN OP_CODE: 0x%x4", op_code);
-            break;
-    }*/
 }

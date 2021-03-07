@@ -188,15 +188,16 @@ void Gui::draw(SDL_Window* window, ImguiState& state)
         ImVec2 cursor_p = ImGui::GetCursorScreenPos();
 
         // Coordinates of current pixel being layed out
-        int x;
-        int y;
-        for (x = 0; x < DISPLAY_W; ++x)
+        for (int y = 0; y < DISPLAY_H; ++y)
         {
-            for (y = 0; y < DISPLAY_H; ++y)
+            for (int x = 0; x < DISPLAY_W; ++x)
             {
                 // Determine if pixel should be filled or not
                 ImU32 col;
-                bool fillPixel = (bool)(rand() % 2);
+
+                bool fillPixel = DISPLAY_MATRIX[y * DISPLAY_W + x];
+                //bool fillPixel = (bool)(rand() % 2);
+
                 if (fillPixel)
                 {
                     col = ImColor(255, 255, 255, 255);
