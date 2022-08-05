@@ -2,22 +2,15 @@
 #include "gui.h"
 #include "parser.h"
 
-/*
- * Initialize global variables (from globals.h)
- */
-
-char V[16];
-int I;
-int PC;
-char SP;
-char DISPLAY_MATRIX[DISPLAY_W * DISPLAY_H];
-
 int main(int argc, char* argv[])
 {
+    // Use current time as seed for random generator
+    srand(time(0));
+
     //----------------------------------------------------------
     // Read and Parse Chip8 rom file
     std::vector<int> op_codes;
-    Parser::read_rom("../../roms/Maze [David Winter, 199x].ch8", op_codes);
+    Parser::read_rom("../../roms/Maze [David Winter, 199x].ch8");
 
     //----------------------------------------------------------
     // Setup and run main GUI (rendering + events handling) thread
@@ -26,9 +19,12 @@ int main(int argc, char* argv[])
 
     Gui::setup(window);
     
-    ImguiState state;
+    Globals::ImguiState state;
     while (state.status == 0)
     {
+        // Execute the next op-code (instruction)
+        Parser::cycle();
+
         // Render GUI and capture keypresses and other interactions from GUI
         Gui::draw(window, state);
 

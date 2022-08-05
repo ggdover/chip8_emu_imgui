@@ -32,7 +32,7 @@ class Gui
          * - window [in] = The instance that is instantiated when passed to function 'Gui::setup()'
          * - state [Out] = Holds information on key presses and other gui interaction
          */
-        static void draw(SDL_Window* window, ImguiState &state);
+        static void draw(SDL_Window* window, Globals::ImguiState &state);
 
         /*
          * SUMMARY
@@ -42,7 +42,7 @@ class Gui
          * - window [in] = The instance that is instantiated when passed to function 'Gui::setup()'
          * - state [Out] = TBD
          */
-        static void pollEvents(SDL_Window* window, ImguiState &state);
+        static void pollEvents(SDL_Window* window, Globals::ImguiState &state);
 
         /*
          * SUMMARY

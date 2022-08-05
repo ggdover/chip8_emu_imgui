@@ -1,9 +1,10 @@
 #include "parser.h"
-#include <stdio.h>
 #include <assert.h>
 #include "op.h"
+#include "globals.h"
+#include "utils.h"
 
-void Parser::read_rom(std::string filepath, std::vector<int>& op_codes)
+void Parser::read_rom(std::string filepath)
 {
     FILE* fp;
     size_t count = 0;
@@ -33,26 +34,38 @@ void Parser::read_rom(std::string filepath, std::vector<int>& op_codes)
         }
 
         int opcode = (msb_byte << 8) + lsb_byte; // 16-bit, size of a chip8 instruction
-        printf("msb = %2x | lsb = %2x | opcode = %4x\n", msb_byte, lsb_byte, opcode);
-        op_codes.push_back(opcode);
+        printf("msb = %2X | lsb = %2X | opcode = %0X", msb_byte, lsb_byte, opcode);
+        Globals::MEMORY.push_back(msb_byte);
+        Globals::MEMORY.push_back(lsb_byte);
 
         ++count;
     } while(1);
 
+    printf("&MEMORY = %p MEMORY.size()= %lu", 
+        (void*)&Globals::MEMORY, 
+        Globals::MEMORY.size());
+
     fclose(fp);
 }
 
-//#### Function that parses op_code and couples each op_code with a function call
-void Parser::parse_op_codes(std::vector<int> op_codes)
+void Parser::cycle()
 {
-    for (auto op_code : op_codes)
+    int prevPC = Globals::PC;
+
+    int op_code = (Globals::MEMORY[Globals::PC] << 8) + Globals::MEMORY[Globals::PC+1];
+    printf("PC = %d(0x%0X) op_code = %d(0x%0X)", Globals::PC, Globals::PC, op_code, op_code);
+    execute(op_code);
+
+    // Only update the PC register here if the op-code 
+    // execution didn't update the register itself
+    if (prevPC == Globals::PC)
     {
-        parse_op_code(op_code);
+        Globals::PC += 2;
     }
 }
 
-void Parser::parse_op_code(int op_code)
-{
+void Parser::execute(int op_code)
+{    
     if (0x00E0 == op_code)
     {
         Op::clear();
@@ -61,32 +74,136 @@ void Parser::parse_op_code(int op_code)
     {
         Op::ret();
     }
-    else if (0x1000 & op_code == 0x1000)
+    else if ((0xF000 & op_code) == 0x1000)
     {
         Op::jp_addr(op_code);
     }
-    else if (0x2000 & op_code == 0x2000)
+    else if ((0xF000 & op_code) == 0x2000)
     {
         Op::call_addr(op_code);
     }
-    else if (0x3000 & op_code == 0x3000)
+    else if ((0xF000 & op_code) == 0x3000)
     {
         Op::se_vx_byte(op_code);
     }
-    else if (0x4000 & op_code == 0x4000)
+    else if ((0xF000 & op_code) == 0x4000)
     {
         Op::sne_vx_byte(op_code);
     }
-    else if (0x5000 & op_code == 0x5000)
+    else if ((0xF00F & op_code) == 0x5000)
     {
         Op::se_vx_vy(op_code);
     }
-    else if (0x6000 & op_code == 0x6000)
+    else if ((0xF000 & op_code) == 0x6000)
     {
-        Op::load_vx_byte(op_code);
+        Op::ld_vx_byte(op_code);
+    }
+    else if ((0xF000 & op_code) == 0x7000)
+    {
+        Op::add_vx_byte(op_code);
+    }
+    else if ((0xF00F & op_code) == 0x8000)
+    {
+        Op::ld_vx_vy(op_code);
+    }
+    else if ((0xF00F & op_code) == 0x8001)
+    {
+        Op::or_vx_vy(op_code);
+    }
+    else if ((0xF00F & op_code) == 0x8002)
+    {
+        Op::and_vx_vy(op_code);
+    }
+    else if ((0xF00F & op_code) == 0x8003)
+    {
+        Op::xor_vx_vy(op_code);
+    }
+    else if ((0xF00F & op_code) == 0x8004)
+    {
+        Op::add_vx_vy(op_code);
+    }
+    else if ((0xF00F & op_code) == 0x8005)
+    {
+        Op::sub_vx_vy(op_code);
+    }
+    else if ((0xF00F & op_code) == 0x8006)
+    {
+        Op::shr_vx_vy(op_code);
+    }
+    else if ((0xF00F & op_code) == 0x8007)
+    {
+        Op::subn_vx_vy(op_code);
+    }
+    else if ((0xF00F & op_code) == 0x800E)
+    {
+        Op::shl_vx_vy(op_code);
+    }
+    else if ((0xF00F & op_code) == 0x9000)
+    {
+        Op::sne_vx_vy(op_code);
+    }
+    else if ((0xF000 & op_code) == 0xA000)
+    {
+        Op::ld_i_addr(op_code);
+    }
+    else if ((0xF000 & op_code) == 0xB000)
+    {
+        Op::jp_v0_addr(op_code);
+    }
+    else if ((0xF000 & op_code) == 0xC000)
+    {
+        Op::rnd_vx_byte(op_code);
+    }
+    else if ((0xF000 & op_code) == 0xD000)
+    {
+        Op::drw_vx_vy_nibble(op_code);
+    }
+    else if ((0xF0FF & op_code) == 0xE09E)
+    {
+        Op::skp_vx(op_code);
+    }
+    else if ((0xF0FF & op_code) == 0xE0A1)
+    {
+        Op::sknp_vx(op_code);
+    }
+    else if ((0xF0FF & op_code) == 0xF007)
+    {
+        Op::ld_vx_dt(op_code);
+    }
+    else if ((0xF0FF & op_code) == 0xF00A)
+    {
+        Op::ld_vx_k(op_code);
+    }
+    else if ((0xF0FF & op_code) == 0xF015)
+    {
+        Op::ld_dt_vx(op_code);
+    }
+    else if ((0xF0FF & op_code) == 0xF018)
+    {
+        Op::ld_st_vx(op_code);
+    }
+    else if ((0xF0FF & op_code) == 0xF01E)
+    {
+        Op::add_i_vx(op_code);
+    }
+    else if ((0xF0FF & op_code) == 0xF029)
+    {
+        Op::ld_f_vx(op_code);
+    }
+    else if ((0xF0FF & op_code) == 0xF033)
+    {
+        Op::ld_b_vx(op_code);
+    }
+    else if ((0xF0FF & op_code) == 0xF055)
+    {
+        Op::ld_i_vx_store(op_code);
+    }
+    else if ((0xF0FF & op_code) == 0xF065)
+    {
+        Op::ld_i_vx_read(op_code);
     }
     else
     {
-        printf("Unknown Op_code = %x\n", op_code);
+        printf("Unknown Op_code = %0X\n", op_code);
     }
 }

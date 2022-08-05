@@ -10,10 +10,13 @@ target_sources(mytarget
 		gui.h
 		gui.cpp
 		globals.h
+		globals.cpp
 		parser.h
 		parser.cpp
 		op.h
 		op.cpp
+		utils.h
+		utils.cpp
 )
 
 # Incase there are any shared or static libraries that we are linking to

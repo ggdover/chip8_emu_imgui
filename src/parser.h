@@ -1,7 +1,7 @@
 
 // #### This file:
 // Responsible for reading binary data from Chip8 rom file
-// and parse the data into an accessable data-structure
+// and parse them into op-code and execute/interpret them
 
 //Memory Map:
 //+---------------+= 0xFFF (4095) End of Chip-8 RAM
@@ -35,23 +35,28 @@ class Parser
     public:
         /*
          * SUMMARY
-         * Read op codes from chip8 rom file
+         * Read the bytes of from the chip8 rom file and store it in global variable MEMORY
          *
          * PARAMETERS
          * - filepath [in]  = Filepath to rom file to be read
-         * - op_codes [out] = List of op codes read from rom file
          */
-        static void read_rom(std::string filepath, std::vector<int>& op_codes);
+        static void read_rom(std::string filepath);
 
         /*
          * SUMMARY
-         * TBD
-         *
-         * PARAMETERS
-         * TBD
+         * Step/Run a CPU cycle, which means take the address in PC register and 
+         * execute the 16bit op_code from that address, including update PC register
+         * to it's next correct value.
          */
-        void parse_op_codes(std::vector<int> op_codes);
+        static void cycle();
 
     private:
-        void parse_op_code(int op_code);
+        /*
+         * SUMMARY
+         * Read opcode and execute actions
+         *
+         * PARAMETERS
+         * - op_code [in] = The op code to execute
+         */
+        static void execute(int op_code);
 };

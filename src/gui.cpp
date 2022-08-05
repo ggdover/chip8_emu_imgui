@@ -117,7 +117,7 @@ int Gui::setup(SDL_Window*& window)
     return 0;
 }
 
-void Gui::draw(SDL_Window* window, ImguiState& state)
+void Gui::draw(SDL_Window* window, Globals::ImguiState& state)
 {
     if (!window)
     {
@@ -172,13 +172,13 @@ void Gui::draw(SDL_Window* window, ImguiState& state)
 
         // Setting window size
         float window_w =
-            DISPLAY_W * PIXEL_W +    // Size of contents
-            ImGui::GetCursorPosX() + // Left padding (distance between left edge of window and left edge of content)
-            WIN_PADDING_RIGHT;       // Right padding (distance between right edge of content and right edge of window)
+            Globals::DISPLAY_W * PIXEL_W + // Size of contents
+            ImGui::GetCursorPosX() +       // Left padding (distance between left edge of window and left edge of content)
+            WIN_PADDING_RIGHT;             // Right padding (distance between right edge of content and right edge of window)
         float window_h =
-            DISPLAY_H * PIXEL_H +    // Size of contents
-            ImGui::GetCursorPosY() + // Top padding (distance between top edge of window and top edge of content)
-            WIN_PADDING_BOTTOM;      // Bottom padding (distance between bottom edge of content and bottom edge of window)
+            Globals::DISPLAY_H * PIXEL_H + // Size of contents
+            ImGui::GetCursorPosY() +       // Top padding (distance between top edge of window and top edge of content)
+            WIN_PADDING_BOTTOM;            // Bottom padding (distance between bottom edge of content and bottom edge of window)
         ImVec2 window_size(window_w, window_h);
         ImGui::SetWindowSize(window_size);
 
@@ -188,14 +188,14 @@ void Gui::draw(SDL_Window* window, ImguiState& state)
         ImVec2 cursor_p = ImGui::GetCursorScreenPos();
 
         // Coordinates of current pixel being layed out
-        for (int y = 0; y < DISPLAY_H; ++y)
+        for (int y = 0; y < Globals::DISPLAY_H; ++y)
         {
-            for (int x = 0; x < DISPLAY_W; ++x)
+            for (int x = 0; x < Globals::DISPLAY_W; ++x)
             {
                 // Determine if pixel should be filled or not
                 ImU32 col;
 
-                bool fillPixel = DISPLAY_MATRIX[y * DISPLAY_W + x];
+                bool fillPixel = Globals::DISPLAY_MATRIX[y * Globals::DISPLAY_W + x];
                 //bool fillPixel = (bool)(rand() % 2);
 
                 if (fillPixel)
@@ -228,7 +228,7 @@ void Gui::draw(SDL_Window* window, ImguiState& state)
     SDL_GL_SwapWindow(window);
 }
 
-void Gui::pollEvents(SDL_Window* window, ImguiState &state)
+void Gui::pollEvents(SDL_Window* window, Globals::ImguiState &state)
 {
     if (!window)
     {
